@@ -1,18 +1,12 @@
-from flask import Flask
-from config import Config
+from info import create_app
 
-app=Flask(__name__)
+app = create_app('develop')
 
-#设置配置信息(基类配置信息)
-class Config(object):
-    DEBUG=True
-
-#加载配置类
-app.config.from_object(Config)
 
 @app.route('/')
 def index():
-    return 'hello world'
+    return 'index'
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     app.run()
