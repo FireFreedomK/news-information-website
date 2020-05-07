@@ -12,4 +12,8 @@ def create_app(config_name):
     #加载配置类
     app.config.from_object(config)
 
+    # 将首页蓝图index_bp,注册到app中
+    from info.modules.index import index_bp
+    app.register_blueprint(index_bp)
+
     return app
