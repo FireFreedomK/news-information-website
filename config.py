@@ -14,7 +14,7 @@ class Config(object):
     LEVEL_NAME = logging.DEBUG
 
     # 数据库配置信息
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:mysql@localhost:3306/information'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:123456@localhost:3306/information'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True # 每当改变数据内容之后，在视图函数结束的时候会自动提交
 
