@@ -1,9 +1,13 @@
 from flask import Flask
 from redis import StrictRedis
+from flask_sqlalchemy import SQLAlchemy
 
 from config import config_dict
 import logging
 from logging.handlers import RotatingFileHandler
+
+#在外部定义DB对象
+db = SQLAlchemy()
 
 # 定义redis_store变量
 redis_store = None
@@ -15,14 +19,14 @@ def create_app(config_name):
 
     config = config_dict.get(config_name)
 
-    # 调用日志方法,记录程序运行信息
-    log_file(config.LEVEL_NAME)
-
     #根据传入的配置类名称,取出对应的配置类
     config = config_dict.get(config_name)
 
     #加载配置类
     app.config.from_object(config)
+
+    #创建sqlalchemy对象,关联app
+    db.init_app(app)
 
     #调用日志方法，记录程序运行信息
     log_file(config.LEVEL_NAME)
