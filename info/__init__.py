@@ -1,6 +1,7 @@
 from flask import Flask
 from redis import StrictRedis
 from flask_sqlalchemy import SQLAlchemy
+from flask_session import Session
 
 from config import config_dict
 import logging
@@ -30,6 +31,9 @@ def create_app(config_name):
 
     #调用日志方法，记录程序运行信息
     log_file(config.LEVEL_NAME)
+
+    # 创建Session对象,读取APP中session配置信息
+    Session(app)
 
     # 创建redis对象
     global redis_store  # global将局部变量声明为一个全局的
