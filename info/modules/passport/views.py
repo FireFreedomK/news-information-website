@@ -7,6 +7,88 @@ from info.utils.captcha.captcha import captcha
 from info import redis_store, constants, db
 from info.utils.response_code import RET
 from info.libs.yuntongxun.sms import CCP
+from info.models import User
+
+# 注册用户
+# 请求路径: /passport/register
+# 请求方式: POST
+# 请求参数: mobile, sms_code,password
+# 返回值: errno, errmsg
+@passport_bp.route('/register', methods=['POST'])
+def register():
+    """
+    1. 获取参数
+    2. 校验参数,为空校验
+    3. 手机号作为key取出redis中的短信验证码
+    4. 判断短信验证码是否过期
+    5. 判断短信验证码是否正确
+    6. 删除短信验证码
+    7. 创建用户对象
+    8. 设置用户对象属性
+    9. 保存用户到数据库
+    10. 返回响应
+    :return:
+    """
+    # 1. 获取参数
+    # json_data = request.data
+    # dict_data = json.loads(json_data)
+
+    #可以替换掉上面的两句话
+    dict_data = request.json
+    # dict_data = request.get_json() #等价于上面一句话
+
+    mobile = dict_data.get("mobile")
+    sms_code = dict_data.get("sms_code")
+    password = dict_data.get("password")
+
+    # 2. 校验参数,为空校验
+    if not all([mobile,sms_code,password]):
+        return jsonify(errno=RET.PARAMERR,errmsg="参数不全")
+
+    # 3. 手机号作为key取出redis中的短信验证码
+    try:
+        redis_sms_code = redis_store.get("sms_code:%s"%mobile)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg="短信验证码取出失败")
+
+    # 4. 判断短信验证码是否过期
+    if not redis_sms_code:
+        return jsonify(errno=RET.NODATA,errmsg="短信验证码已经过期")
+
+    # 5. 判断短信验证码是否正确
+    if sms_code != redis_sms_code:
+        return jsonify(errno=RET.DATAERR,errmsg="短信验证码填写错误")
+
+    # 6. 删除短信验证码
+    try:
+        redis_store.delete("sms_code:%s"%mobile)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="短信验证码删除失败")
+
+    # 7. 创建用户对象
+    user = User()
+
+    # 8. 设置用户对象属性
+    user.nick_name = mobile
+    # user.password_hash = password
+    user.password = password #密码的加密处理
+    user.mobile = mobile
+    user.signature = "该用户很懒,什么都没写"
+
+    # 9. 保存用户到数据库
+    try:
+        db.session.add(user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="用户注册失败")
+
+    # 10. 返回响应
+    return jsonify(errno=RET.OK,errmsg="注册成功")
+
 
 # 获取短信验证码
 # 请求路径: /passport/sms_code
