@@ -45,6 +45,11 @@ def create_app(config_name):
                               port=config.REDIS_PORT,
                               decode_responses=True)
 
+    # 将函数添加到系统默认的过滤器列表中
+    # 参数1: 函数的名字,  参数2: 过滤器的名字
+    from info.utils.commons import hot_news_filter
+    app.add_template_filter(hot_news_filter, "my_filter")
+
     # 将首页蓝图index_bp,注册到app中
     from info.modules.index import index_bp
     app.register_blueprint(index_bp)
