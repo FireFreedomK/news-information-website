@@ -54,6 +54,10 @@ def create_app(config_name):
     from info.modules.index import index_bp
     app.register_blueprint(index_bp)
 
+    # 将新闻蓝图news_bp,注册到app中
+    from info.modules.news import news_bp
+    app.register_blueprint(news_bp)
+
     # 将认证蓝图passport,注册到app中
     from info.modules.passport import passport_bp
     app.register_blueprint(passport_bp)
